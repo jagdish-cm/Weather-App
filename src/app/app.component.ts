@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { WeatherService } from './weather.service';
 import { faEdit } from '@fortawesome/free-solid-svg-icons';
+import { interval, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -258,6 +259,7 @@ export class AppComponent implements OnInit {
     { name: 'Zambia', code: 'ZM' },
     { name: 'Zimbabwe', code: 'ZW' }
   ];
+  subscription: Subscription;
 
   thunderstormbg =
     'data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjQ3MXB0IiB2aWV3Qm94PSIwIC0zNCA0NzEuODczIDQ3MSIgd2lkdGg9IjQ3MXB0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Im00MjUuNDc2NTYyIDExMC43OTI5NjljMy41NDI5NjktMjcuNzUtMTAuMTE3MTg3LTU0Ljg2NzE4OC0zNC41MjM0MzctNjguNTM1MTU3LTI0LjQwNjI1LTEzLjY2Nzk2OC01NC42Njc5NjktMTEuMTQ0NTMxLTc2LjQ3NjU2MyA2LjM3NS0yNC4xNDQ1MzEtMzUuNjk5MjE4LTY2Ljk3MjY1Ni01My45MzM1OTMtMTA5LjQ0MTQwNi00Ni41OTc2NTYtNDIuNDcyNjU2IDcuMzM5ODQ0LTc2LjY5OTIxOCAzOC44ODY3MTktODcuNDY0ODQ0IDgwLjYyMTA5NC0yNi43MTQ4NDMtMTMuMDc0MjE5LTU4LjcxODc1LTguNDIxODc1LTgwLjYwNTQ2OCAxMS43MTQ4NDQtMjEuODg2NzE5IDIwLjE0MDYyNS0yOS4xNzk2ODggNTEuNjQ4NDM3LTE4LjM2NzE4OCA3OS4zNTU0NjggMTAuODEyNSAyNy43MTA5MzggMzcuNTE1NjI1IDQ1Ljk0OTIxOSA2Ny4yNjE3MTkgNDUuOTQxNDA3aDMzMS4xOTkyMTljMjguNjIxMDk0LjAzMTI1IDUyLjQ0MTQwNi0yMS45ODgyODEgNTQuNjUyMzQ0LTUwLjUyNzM0NCAyLjIwNzAzMS0yOC41MzkwNjMtMTcuOTMzNTk0LTUzLjk2NDg0NC00Ni4yMjI2NTctNTguMzM5ODQ0em0wIDAiIGZpbGw9IiMyNmEzYjkiLz48cGF0aCBkPSJtMjI1LjY3OTY4OCAxNDkuODk0NTMxLTU1LjYzMjgxMyA2OS43NzM0MzhoNzYuMzk4NDM3bDU1LjYzMjgxMy02OS43NzM0Mzh6bTAgMCIgZmlsbD0iIzE2OGFhNSIvPjxwYXRoIGQ9Im00MjUuNDc2NTYyIDExMC43OTI5NjljMi42MDkzNzYtMTkuNTc0MjE5LTMuMzg2NzE4LTM5LjMyMDMxMy0xNi40Mzc1LTU0LjE0MDYyNS0xMy4wNTQ2ODctMTQuODE2NDA2LTMxLjg4NjcxOC0yMy4yNTc4MTMtNTEuNjMyODEyLTIzLjE0MDYyNS02LjMyODEyNS4wMDc4MTItMTIuNjI1Ljg5MDYyNS0xOC43MDcwMzEgMi42MzI4MTIgMzIuODE2NDA2IDkuMDMxMjUgNTMuOTIxODc1IDQwLjkxMDE1NyA0OS40MTc5NjkgNzQuNjQ4NDM4IDI4LjMxMjUgNC4zNTE1NjIgNDguNDg0Mzc0IDI5Ljc4OTA2MiA0Ni4yNzM0MzcgNTguMzQ3NjU2cy0yNi4wNjI1IDUwLjU4NTkzNy01NC43MDMxMjUgNTAuNTI3MzQ0aDM3LjM1OTM3NWMyOC42MjEwOTQuMDMxMjUgNTIuNDQxNDA2LTIxLjk4ODI4MSA1NC42NTIzNDQtNTAuNTI3MzQ0IDIuMjA3MDMxLTI4LjUzOTA2My0xNy45MzM1OTQtNTMuOTY0ODQ0LTQ2LjIyMjY1Ny01OC4zMzk4NDR6bTAgMCIgZmlsbD0iIzE2OGFhNSIvPjxwYXRoIGQ9Im04NS44NTkzNzUgNzUuMjQyMTg4Yy0yLjIzMDQ2OSAwLTQuNDIxODc1LjEzNjcxOC02LjU5NzY1Ni4zMzIwMzEgNS44Nzg5MDYgMjQuMTYwMTU2IDIwLjA1NDY4NyA0NS40ODgyODEgNDAuMDU0Njg3IDYwLjI2MTcxOS00Ljc4NTE1Ni0xNy4zNDM3NS01LjM4NjcxOC0zNS41NzgxMjYtMS43NDYwOTQtNTMuMTk5MjE5LTkuODYzMjgxLTQuODYzMjgxLTIwLjcxNDg0My03LjM5MDYyNS0zMS43MTA5MzctNy4zOTQ1MzF6bTAgMCIgZmlsbD0iIzE2OGFhNSIvPjxwYXRoIGQ9Im0zNTguOTMzNTk0IDI1Mi4xNzU3ODFoLTQ4Ljk0OTIxOWwtNDcuODcxMDk0IDYwLjAzNTE1N2g0MS45NzY1NjNsLTQ3LjE0MDYyNSA1OS4xMjEwOTMgMTEzLjEwMTU2Mi03NC40NjA5MzdoLTQ2Ljc1NzgxMnptMCAwIiBmaWxsPSIjZmFiZTAyIi8+PHBhdGggZD0ibTI3Mi4wNDY4NzUgMTQ5Ljg5NDUzMWgtNzYuNDAyMzQ0bC03NC43MjY1NjIgOTMuNzE4NzVoNjUuNTE5NTMxbC03My41ODIwMzEgOTIuMjc3MzQ0IDE3Ni41NDI5NjktMTE2LjIzMDQ2OWgtNzIuOTgwNDY5em0wIDAiIGZpbGw9IiNmYWJlMDIiLz48ZyBmaWxsPSIjZjU5YTFkIj48cGF0aCBkPSJtMzIzLjI5Mjk2OSAyOTYuODcxMDk0IDM1LjY0MDYyNS00NC42OTUzMTNoLTIzLjI3MzQzOGwtMzUuNjMyODEyIDQ0LjY5NTMxM3ptMCAwIi8+PHBhdGggZD0ibTM0Ni43NzczNDQgMjk2Ljg3MTA5NC02NC4xMDkzNzUgNDIuMjA3MDMxLTI1LjcxODc1IDMyLjI1MzkwNiAxMTMuMTAxNTYyLTc0LjQ2MDkzN3ptMCAwIi8+PHBhdGggZD0ibTIxNi40MTc5NjkgMjE5LjY2MDE1NiA1NS42Mjg5MDYtNjkuNzY1NjI1aC0yMy4yNjk1MzFsLTU1LjYzMjgxMyA2OS43NjU2MjV6bTAgMCIvPjxwYXRoIGQ9Im0yNjYuMTI4OTA2IDIxOS42NjAxNTYtMTI3LjU1ODU5NCA4My45ODA0NjktMjUuNzE0ODQzIDMyLjI1IDE3Ni41NDI5NjktMTE2LjIzMDQ2OXptMCAwIi8+PC9nPjxwYXRoIGQ9Im02Ljk5NjA5NCAzNDIuODkwNjI1Yy0yLjY4NzUgMC01LjEzNjcxOS0xLjU0Mjk2OS02LjMwNDY4OC0zLjk2NDg0NC0xLjE2NDA2Mi0yLjQyMTg3NS0uODM5ODQ0LTUuMzAwNzgxLjgzOTg0NC03LjQwMjM0M2wxOC4xNzU3ODEtMjIuNzY5NTMyYzIuNDEwMTU3LTMuMDE5NTMxIDYuODE2NDA3LTMuNTE1NjI1IDkuODM5ODQ0LTEuMTAxNTYyIDMuMDE5NTMxIDIuNDEwMTU2IDMuNTE1NjI1IDYuODE2NDA2IDEuMTAxNTYzIDkuODM5ODQ0bC0xOC4xNzU3ODIgMjIuNzYxNzE4Yy0xLjMyODEyNSAxLjY2Nzk2OS0zLjM0Mzc1IDIuNjQwNjI1LTUuNDc2NTYyIDIuNjM2NzE5em0wIDAiIGZpbGw9IiNiZGQ5ZTUiLz48cGF0aCBkPSJtNDMuMzk0NTMxIDI5Ny4yOTI5NjljLTIuNjkxNDA2LS4wMDM5MDctNS4xNDA2MjUtMS41NDI5NjktNi4zMDg1OTMtMy45Njg3NS0xLjE2NDA2My0yLjQyMTg3NS0uODM5ODQ0LTUuMzAwNzgxLjgzOTg0My03LjQwMjM0NGwzNC4xNzk2ODgtNDIuNzk2ODc1YzIuNDE0MDYyLTMuMDIzNDM4IDYuODIwMzEyLTMuNTE5NTMxIDkuODM5ODQzLTEuMTA1NDY5IDMuMDIzNDM4IDIuNDE0MDYzIDMuNTE1NjI2IDYuODE2NDA3IDEuMTA1NDY5IDkuODM5ODQ0bC0zNC4xNzk2ODcgNDIuODAwNzgxYy0xLjMyODEyNSAxLjY2NDA2My0zLjM0NzY1NiAyLjYzNjcxOS01LjQ3NjU2MyAyLjYzMjgxM3ptMCAwIiBmaWxsPSIjMjZhM2I5Ii8+PHBhdGggZD0ibTIxLjU3NDIxOSA0MDIuNzAzMTI1Yy0yLjY5MTQwNyAwLTUuMTQwNjI1LTEuNTQyOTY5LTYuMzA0Njg4LTMuOTY0ODQ0LTEuMTY3OTY5LTIuNDI1NzgxLS44Mzk4NDMtNS4zMDA3ODEuODM1OTM4LTcuNDAyMzQzbDIxLjgyMDMxMi0yNy4zMzU5MzhjMi40MTQwNjMtMy4wMjM0MzggNi44MTY0MDctMy41MTU2MjUgOS44Mzk4NDQtMS4xMDU0NjkgMy4wMjM0MzcgMi40MTQwNjMgMy41MTU2MjUgNi44MjAzMTMgMS4xMDU0NjkgOS44Mzk4NDRsLTIxLjgyMDMxMyAyNy4zMzIwMzFjLTEuMzI4MTI1IDEuNjY3OTY5LTMuMzQzNzUgMi42NDA2MjUtNS40NzY1NjIgMi42MzY3MTl6bTAgMCIgZmlsbD0iI2JkZDllNSIvPjxwYXRoIGQ9Im02MC40ODQzNzUgMzUzLjk2MDkzOGMtMi42ODc1LS4wMDM5MDctNS4xNDA2MjUtMS41NDI5NjktNi4zMDQ2ODctMy45Njg3NS0xLjE2NDA2My0yLjQyMTg3Ni0uODM5ODQ0LTUuMzAwNzgyLjgzOTg0My03LjQwMjM0NGwxNS4zODY3MTktMTkuMjczNDM4YzIuNDE3OTY5LTMuMDIzNDM3IDYuODI0MjE5LTMuNTExNzE4IDkuODQ3NjU2LTEuMDkzNzUgMy4wMTk1MzIgMi40MTQwNjMgMy41MDc4MTMgNi44MjQyMTkgMS4wOTM3NSA5Ljg0Mzc1bC0xNS4zOTA2MjUgMTkuMjc3MzQ0Yy0xLjMyODEyNSAxLjY2MDE1Ni0zLjM0Mzc1IDIuNjIxMDk0LTUuNDcyNjU2IDIuNjE3MTg4em0wIDAiIGZpbGw9IiMyNmEzYjkiLz48cGF0aCBkPSJtOTMuMjg5MDYyIDMxMi44NjcxODhjLTIuNjkxNDA2IDAtNS4xNDQ1MzEtMS41NDI5NjktNi4zMDg1OTMtMy45Njg3NS0xLjE2Nzk2OS0yLjQyNTc4Mi0uODM1OTM4LTUuMzA0Njg4Ljg0Mzc1LTcuNDA2MjVsMjkuNTIzNDM3LTM2Ljk4MDQ2OWMyLjQxMDE1Ni0zLjAyMzQzOCA2LjgxNjQwNi0zLjUxNTYyNSA5LjgzOTg0NC0xLjEwNTQ2OSAzLjAxOTUzMSAyLjQxNDA2MiAzLjUxNTYyNSA2LjgyMDMxMiAxLjEwMTU2MiA5LjgzOTg0NGwtMjkuNTE5NTMxIDM2Ljk4MDQ2OGMtMS4zMjgxMjUgMS42NzE4NzYtMy4zNDM3NSAyLjY0NDUzMi01LjQ4MDQ2OSAyLjY0MDYyNnptMCAwIiBmaWxsPSIjYmRkOWU1Ii8+PHBhdGggZD0ibTgzLjg5ODQzOCA0MDIuNzAzMTI1Yy0yLjY5MTQwNyAwLTUuMTQwNjI2LTEuNTQyOTY5LTYuMzA0Njg4LTMuOTY0ODQ0LTEuMTY3OTY5LTIuNDI1NzgxLS44NDM3NS01LjMwMDc4MS44MzU5MzgtNy40MDIzNDNsMjguOTUzMTI0LTM2LjI3MzQzOGMyLjQxMDE1Ny0zLjAxOTUzMSA2LjgxNjQwNy0zLjUxNTYyNSA5LjgzOTg0NC0xLjEwMTU2MiAzLjAxOTUzMiAyLjQxMDE1NiAzLjUxNTYyNSA2LjgxNjQwNiAxLjEwMTU2MyA5LjgzOTg0M2wtMjguOTQ5MjE5IDM2LjI2NTYyNWMtMS4zMjgxMjUgMS42Njc5NjktMy4zNDM3NSAyLjY0MDYyNS01LjQ3NjU2MiAyLjYzNjcxOXptMCAwIiBmaWxsPSIjYmRkOWU1Ii8+PHBhdGggZD0ibTE0Ni4yMjY1NjIgNDAyLjcwMzEyNWMtMi42OTE0MDYgMC01LjE0MDYyNC0xLjU0Mjk2OS02LjMwODU5My0zLjk2NDg0NC0xLjE2NDA2My0yLjQyNTc4MS0uODM5ODQ0LTUuMzAwNzgxLjgzOTg0My03LjQwMjM0M2wzOC45MTQwNjMtNDguNzVjMi40MTAxNTYtMy4wMTk1MzIgNi44MTY0MDYtMy41MTU2MjYgOS44Mzk4NDQtMS4xMDE1NjMgMy4wMTk1MzEgMi40MTAxNTYgMy41MTU2MjUgNi44MTY0MDYgMS4xMDE1NjIgOS44Mzk4NDRsLTM4LjkxNDA2MiA0OC43NDIxODdjLTEuMzI4MTI1IDEuNjY3OTY5LTMuMzQzNzUgMi42MzY3MTktNS40NzI2NTcgMi42MzY3MTl6bTAgMCIgZmlsbD0iI2JkZDllNSIvPjxwYXRoIGQ9Im0yMDUuMzg2NzE5IDMyOC41ODU5MzhjLTIuNjg3NSAwLTUuMTQwNjI1LTEuNTQyOTY5LTYuMzA0Njg4LTMuOTY0ODQ0LTEuMTY0MDYyLTIuNDI1NzgyLS44MzU5MzctNS4zMDA3ODIuODM5ODQ0LTcuNDAyMzQ0bDMyLjgwMDc4MS00MS4xMDU0NjljMi40MTAxNTYtMy4wMjM0MzcgNi44MTY0MDYtMy41MTU2MjUgOS44MzU5MzgtMS4xMDU0NjkgMy4wMjM0MzcgMi40MTQwNjMgMy41MTU2MjUgNi44MjAzMTMgMS4xMDE1NjIgOS44Mzk4NDRsLTMyLjgwMDc4MSA0MS4xMDkzNzVjLTEuMzI4MTI1IDEuNjY0MDYzLTMuMzQzNzUgMi42MzY3MTktNS40NzI2NTYgMi42Mjg5MDd6bTAgMCIgZmlsbD0iIzI2YTNiOSIvPjxwYXRoIGQ9Im0yMDguNTQ2ODc1IDQwMi43MDMxMjVjLTIuNjkxNDA2IDAtNS4xNDA2MjUtMS41NDI5NjktNi4zMDg1OTQtMy45NjQ4NDQtMS4xNjQwNjItMi40MjU3ODEtLjgzOTg0My01LjMwMDc4MS44Mzk4NDQtNy40MDIzNDNsNDUuMTk5MjE5LTU2LjY0NDUzMmMyLjQxNDA2Mi0zLjAyMzQzNyA2LjgyMDMxMi0zLjUxNTYyNSA5LjgzOTg0NC0xLjEwNTQ2OCAzLjAyMzQzNyAyLjQxNDA2MiAzLjUxNTYyNCA2LjgyMDMxMiAxLjEwNTQ2OCA5LjgzOTg0M2wtNDUuMTk5MjE4IDU2LjY0MDYyNWMtMS4zMjgxMjYgMS42Njc5NjktMy4zNDc2NTcgMi42NDA2MjUtNS40NzY1NjMgMi42MzY3MTl6bTAgMCIgZmlsbD0iI2JkZDllNSIvPjxwYXRoIGQ9Im0yNzAuODc1IDQwMi43MDMxMjVjLTIuNjg3NSAwLTUuMTM2NzE5LTEuNTQyOTY5LTYuMzA0Njg4LTMuOTY0ODQ0LTEuMTY0MDYyLTIuNDIxODc1LS44Mzk4NDMtNS4yOTY4NzUuODM1OTM4LTcuMzk4NDM3bDcuMTQ4NDM4LTguOTYwOTM4YzIuNDEwMTU2LTMuMDE5NTMxIDYuODE2NDA2LTMuNTE1NjI1IDkuODM1OTM3LTEuMTA1NDY4IDMuMDIzNDM3IDIuNDEwMTU2IDMuNTE5NTMxIDYuODE2NDA2IDEuMTA1NDY5IDkuODM5ODQzbC03LjE0NDUzMiA4Ljk1NzAzMWMtMS4zMzIwMzEgMS42Njc5NjktMy4zNDc2NTYgMi42MzY3MTktNS40NzY1NjIgMi42MzI4MTN6bTAgMCIgZmlsbD0iIzI2YTNiOSIvPjxwYXRoIGQ9Im0zNjYuOTgwNDY5IDI4Mi4zMDg1OTRjLTIuNjg3NSAwLTUuMTQwNjI1LTEuNTQyOTY5LTYuMzA0Njg4LTMuOTY0ODQ0LTEuMTY0MDYyLTIuNDI1NzgxLS44Mzk4NDMtNS4zMDA3ODEuODM5ODQ0LTcuNDAyMzQ0bDIyLjIxNDg0NC0yNy44MzIwMzFjMi40MTAxNTYtMy4wMjM0MzcgNi44MTY0MDYtMy41MTk1MzEgOS44Mzk4NDMtMS4xMDU0NjkgMy4wMjM0MzggMi40MTQwNjMgMy41MTU2MjYgNi44MTY0MDYgMS4xMDU0NjkgOS44Mzk4NDRsLTIyLjIxODc1IDI3LjgyNDIxOWMtMS4zMjgxMjUgMS42Njc5NjktMy4zNDM3NSAyLjY0MDYyNS01LjQ3NjU2MiAyLjY0MDYyNXptMCAwIiBmaWxsPSIjYmRkOWU1Ii8+PHBhdGggZD0ibTMzMy4xOTkyMTkgNDAyLjcwMzEyNWMtMi42OTE0MDcgMC01LjE0MDYyNS0xLjU0Mjk2OS02LjMwODU5NC0zLjk2NDg0NC0xLjE2NDA2My0yLjQyNTc4MS0uODM5ODQ0LTUuMzAwNzgxLjgzOTg0NC03LjQwMjM0M2wyNy4xNTIzNDMtMzRjMi40MTAxNTctMy4wMjM0MzggNi44MTY0MDctMy41MTU2MjYgOS44MzU5MzgtMS4xMDU0NjkgMy4wMjM0MzggMi40MTAxNTYgMy41MTk1MzEgNi44MTY0MDYgMS4xMDU0NjkgOS44MzU5MzdsLTI3LjE0ODQzOCAzNGMtMS4zMzIwMzEgMS42Njc5NjktMy4zNDc2NTYgMi42NDA2MjUtNS40NzY1NjIgMi42MzY3MTl6bTAgMCIgZmlsbD0iI2JkZDllNSIvPjxwYXRoIGQ9Im0zNzUuMjkyOTY5IDM0OS45Njg3NWMtMi42ODc1IDAtNS4xNDA2MjUtMS41NDI5NjktNi4zMDQ2ODgtMy45Njg3NS0xLjE2Nzk2OS0yLjQyMTg3NS0uODM5ODQzLTUuMjk2ODc1LjgzNTkzOC03LjM5ODQzOGw3LjUxNTYyNS05LjQxNDA2MmMyLjQxMDE1Ni0zLjAyMzQzOCA2LjgxNjQwNi0zLjUxNTYyNSA5LjgzOTg0NC0xLjEwNTQ2OSAzLjAxOTUzMSAyLjQxNDA2MyAzLjUxNTYyNCA2LjgyMDMxMyAxLjEwMTU2MiA5LjgzOTg0NGwtNy41MTE3MTkgOS40MTQwNjNjLTEuMzI4MTI1IDEuNjY3OTY4LTMuMzQzNzUgMi42MzY3MTgtNS40NzY1NjIgMi42MzI4MTJ6bTAgMCIgZmlsbD0iIzI2YTNiOSIvPjxwYXRoIGQ9Im00MDEuMjYxNzE5IDMxNy40Mzc1Yy0yLjY4NzUtLjAwMzkwNi01LjE0MDYyNS0xLjU0Mjk2OS02LjMwNDY4OC0zLjk2ODc1LTEuMTY3OTY5LTIuNDIxODc1LS44Mzk4NDMtNS4zMDA3ODEuODM1OTM4LTcuNDAyMzQ0bDMzLjE3MTg3NS00MS41NTQ2ODdjMi40MTQwNjItMy4wMjM0MzggNi44MjAzMTItMy41MTU2MjUgOS44Mzk4NDQtMS4xMDU0NjkgMy4wMjM0MzcgMi40MTQwNjIgMy41MTk1MzEgNi44MjAzMTIgMS4xMDU0NjggOS44Mzk4NDRsLTMzLjE3MTg3NSA0MS41NTg1OTRjLTEuMzI4MTI1IDEuNjY0MDYyLTMuMzQzNzUgMi42MzI4MTItNS40NzY1NjIgMi42MzI4MTJ6bTAgMCIgZmlsbD0iIzI2YTNiOSIvPjwvc3ZnPg==';
@@ -307,6 +309,14 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.list = JSON.parse(localStorage.getItem('cityList'));
+    for (let j = 0; j < this.list.length; j++) {
+      if (this.list[j].state === 2) {
+        const source = interval(30000);
+        this.subscription = source.subscribe(() => {
+          this.refresh(j);
+        });
+      }
+    }
   }
 
   changeState(i: number, state: number) {
@@ -318,7 +328,84 @@ export class AppComponent implements OnInit {
 
   editCity(i: number) {
     this.list[i].state = 4;
+    this.subscription.unsubscribe();
     console.log(this.list[i].state);
+  }
+
+  refresh(i: number) {
+    console.log('refreshing');
+    if (this.list[i].state === 2) {
+      this.weatherService
+        .getCityWeather(this.list[i].city)
+        .subscribe(result => {
+          console.log(this.list[i].wdata.name);
+          this.list[i].wdata = result;
+          let ktemp = result.main.temp;
+          var sec = result.dt;
+          var date = new Date(sec * 1000);
+          var timestr = date.toLocaleTimeString();
+          console.log(timestr);
+          switch (result.weather[0].main) {
+            case 'Thunderstorm':
+              this.list[i].bgsrc = this.thunderstormbg;
+              break;
+            case 'Drizzle':
+              this.list[i].bgsrc = this.drizzlebg;
+              break;
+            case 'Rain':
+              this.list[i].bgsrc = this.rainbg;
+              break;
+            case 'Snow':
+              this.list[i].bgsrc = this.snowbg;
+              break;
+            case 'Mist':
+              this.list[i].bgsrc = this.mistbg;
+              break;
+            case 'Smoke':
+              this.list[i].bgsrc = this.smokebg;
+              break;
+            case 'Haze':
+              this.list[i].bgsrc = this.hazebg;
+              break;
+            case 'Dust':
+              this.list[i].bgsrc = this.dustbg;
+              break;
+            case 'Fog':
+              this.list[i].bgsrc = this.fogbg;
+              break;
+            case 'Sand':
+              this.list[i].bgsrc = this.sandbg;
+              break;
+            case 'Ash':
+              this.list[i].bgsrc = this.ashbg;
+              break;
+            case 'Squall':
+              this.list[i].bgsrc = this.squallbg;
+              break;
+            case 'Tornado':
+              this.list[i].bgsrc = this.tornadobg;
+              break;
+            case 'Clear':
+              this.list[i].bgsrc = this.clearbg;
+              break;
+            case 'Clouds':
+              this.list[i].bgsrc = this.cloudsbg;
+              break;
+          }
+          this.list[i].ctemp = Math.trunc(ktemp - 273.15);
+          this.list[i].ftemp = Math.trunc((ktemp - 273.15) * 1.8 + 32);
+          for (let j = 0; j < this.countries.length; j++) {
+            if (this.countries[j].code === result.sys.country) {
+              console.log('name found');
+              this.list[i].country = this.countries[j].name;
+              break;
+            }
+          }
+          console.log(this.list[i].wdata);
+          this.list[i].state = 2;
+          localStorage.setItem('cityList', JSON.stringify(this.list));
+        });
+    }
   }
 
   submitCity(i: number) {
@@ -390,6 +477,11 @@ export class AppComponent implements OnInit {
         console.log(this.list[i].wdata);
         this.list[i].state = 2;
         localStorage.setItem('cityList', JSON.stringify(this.list));
+
+        const source = interval(30000);
+        this.subscription = source.subscribe(() => {
+          this.refresh(i);
+        });
       },
       error => {
         console.log(error.status);
