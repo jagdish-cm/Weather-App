@@ -308,13 +308,16 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.list = JSON.parse(localStorage.getItem('cityList'));
-    for (let j = 0; j < this.list.length; j++) {
-      if (this.list[j].state === 2) {
-        const source = interval(30000);
-        this.subscription = source.subscribe(() => {
-          this.refresh(j);
-        });
+    let localList = JSON.parse(localStorage.getItem('cityList'));
+    if (localList) {
+      this.list = localList;
+      for (let j = 0; j < this.list.length; j++) {
+        if (this.list[j].state === 2) {
+          const source = interval(30000);
+          this.subscription = source.subscribe(() => {
+            this.refresh(j);
+          });
+        }
       }
     }
   }
@@ -484,7 +487,7 @@ export class AppComponent implements OnInit {
         });
       },
       error => {
-        console.log(error.status);
+        console.log(error);
         this.list[i].state = 5;
       }
     );
